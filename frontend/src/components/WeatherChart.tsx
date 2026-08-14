@@ -1,4 +1,5 @@
 import React from 'react';
+import { format, parseISO } from 'date-fns';
 import {
   LineChart,
   Line,
@@ -33,6 +34,14 @@ export const WeatherChart: React.FC<WeatherChartProps> = ({ data }) => {
               tickLine={false}
               tick={{ fill: '#6b7280', fontSize: 12 }}
               dy={10}
+              minTickGap={20}
+              tickFormatter={(tickStr) => {
+                try {
+                  return format(parseISO(tickStr), 'MMM d');
+                } catch {
+                  return tickStr;
+                }
+              }}
             />
             <YAxis 
               axisLine={false}
