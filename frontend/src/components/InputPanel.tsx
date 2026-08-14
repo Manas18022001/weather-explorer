@@ -2,6 +2,16 @@ import React, { useState } from 'react';
 import { storeWeatherData, StoreWeatherRequest } from '../lib/api';
 import { CloudRain, Loader2, AlertCircle } from 'lucide-react';
 import { addDays, format, differenceInDays } from 'date-fns';
+import dynamic from 'next/dynamic';
+
+const MapSelector = dynamic(() => import('./MapSelector'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-64 w-full bg-gray-50 rounded-xl animate-pulse flex items-center justify-center mb-4 border border-gray-200">
+      <span className="text-gray-400 font-medium flex items-center"><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading Map...</span>
+    </div>
+  ),
+});
 
 interface InputPanelProps {
   onSuccess: (fileName: string) => void;
@@ -63,6 +73,12 @@ export const InputPanel: React.FC<InputPanelProps> = ({ onSuccess }) => {
         <CloudRain className="w-6 h-6 text-blue-500" />
         <h2 className="text-xl font-semibold text-gray-800">Fetch New Data</h2>
       </div>
+
+      <MapSelector 
+        lat={formData.latitude} 
+        lon={formData.longitude} 
+        onChange={(lat, lon) => setFormData(prev => ({ ...prev, latitude: lat, longitude: lon }))} 
+      />
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
