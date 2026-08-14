@@ -1,20 +1,32 @@
 import React from 'react';
 import { WeatherFile } from '../lib/api';
-import { FileJson, Loader2 } from 'lucide-react';
+import { FileJson, Loader2, X } from 'lucide-react';
 
 interface SidebarProps {
   files: WeatherFile[];
   onSelectFile: (fileName: string) => void;
   selectedFile: string | null;
   isLoading: boolean;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ files, onSelectFile, selectedFile, isLoading }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ files, onSelectFile, selectedFile, isLoading, isOpen, onClose }) => {
   return (
-    <div className="w-full md:w-80 bg-gray-50 border-b md:border-b-0 md:border-r border-gray-200 h-64 md:h-screen flex-shrink-0 overflow-y-auto flex flex-col">
-      <div className="p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
-        <h2 className="text-lg font-semibold text-gray-800">Stored Files</h2>
-        <p className="text-sm text-gray-500">{files.length} files available</p>
+    <div className={`
+      ${isOpen ? 'fixed inset-0 z-50 flex' : 'hidden md:flex md:static'}
+      w-full md:w-80 bg-gray-50 border-r border-gray-200 h-screen flex-shrink-0 overflow-y-auto flex-col shadow-xl md:shadow-none
+    `}>
+      <div className="p-4 border-b border-gray-200 bg-white sticky top-0 z-10 flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-800">Stored Files</h2>
+          <p className="text-sm text-gray-500">{files.length} files available</p>
+        </div>
+        {isOpen && onClose && (
+          <button onClick={onClose} className="md:hidden p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
       
       <div className="flex-1 p-4 space-y-2">
