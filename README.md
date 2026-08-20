@@ -8,12 +8,13 @@ A full-stack climate data explorer application built to simulate data engineerin
 - **Data Ingestion**: A Python API fetches historical daily weather data from the Open-Meteo API.
 - **Cloud Object Storage**: The backend strictly validates the payload (max 31 days) and stores the exact raw JSON directly into an **AWS S3 bucket**.
 - **Data Visualization**: A responsive Next.js dashboard uses Recharts to plot temperature trends, paired with a paginated data table.
+- **API Rate Limiting**: Protects against abuse and upstream quota exhaustion using a Fixed Window algorithm via `slowapi` (5 req/min for data ingestion, 15 req/min for S3 queries).
 - **Unified Vercel Deployment**: The FastAPI backend is configured as Vercel Serverless Functions, allowing both the frontend and backend to live on the exact same domain with zero CORS issues!
 
 ## 🏗️ Architecture Stack
 
 - **Frontend**: Next.js (React), Tailwind CSS, Recharts, Leaflet.
-- **Backend**: Python, FastAPI, Pydantic, Boto3 (AWS SDK).
+- **Backend**: Python, FastAPI, Pydantic, Boto3 (AWS SDK), slowapi (Rate Limiting).
 - **Storage**: AWS S3.
 - **Deployment**: Vercel (Next.js Edge + Python Serverless).
 

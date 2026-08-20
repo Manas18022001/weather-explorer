@@ -3,14 +3,20 @@ import json
 import httpx
 import boto3
 from datetime import datetime
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field, field_validator
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 load_dotenv()
 
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(title="Weather Explorer API")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Configuration for AWS S3
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
@@ -55,7 +61,8 @@ class WeatherRequest(BaseModel):
         return end_date
 
 @app.post("/api/store-weather-data")
-async def store_weather_data(req: WeatherRequest):
+@limiter.limit("5/minute")
+async def store_weather_data(request: Request, req: WeatherRequest):
     if not S3_BUCKET_NAME:
         raise HTTPException(status_code=500, detail="S3_BUCKET_NAME is not configured")
 
@@ -95,7 +102,8 @@ async def store_weather_data(req: WeatherRequest):
     return {"status": "ok", "file": file_name}
 
 @app.get("/api/list-weather-files")
-def list_weather_files():
+@limiter.limit("15/minute")
+def list_weather_files(request: Request):
     if not S3_BUCKET_NAME:
         raise HTTPException(status_code=500, detail="S3_BUCKET_NAME is not configured")
 
@@ -117,7 +125,8 @@ def list_weather_files():
         raise HTTPException(status_code=500, detail=f"Failed to list S3 objects: {str(e)}")
 
 @app.get("/api/weather-file-content/{file}")
-def get_weather_file_content(file: str):
+@limiter.limit("15/minute")
+def get_weather_file_content(request: Request, file: str):
     if not S3_BUCKET_NAME:
         raise HTTPException(status_code=500, detail="S3_BUCKET_NAME is not configured")
 
